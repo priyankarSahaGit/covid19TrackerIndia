@@ -1,0 +1,136 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" 
+                controller="Covid19IndiaCtrl">
+    
+    <aura:attribute name="showSpinner" type="Boolean" default="true"/>
+    <aura:attribute name="raw_data" type="Map[]"/>
+    <aura:attribute name="total_confirmed" type="Integer" default="0"/>
+    <aura:attribute name="total_active" type="Integer" default="0"/>
+    <aura:attribute name="total_recovered" type="Integer" default="0"/>
+    <aura:attribute name="total_deceased" type="Integer" default="0"/>
+    <aura:attribute name="delta_confirmed" type="Integer" default="0"/>
+    <aura:attribute name="delta_recovered" type="Integer" default="0"/>
+    <aura:attribute name="delta_deceased" type="Integer" default="0"/>
+    <aura:attribute name="state_delta_confirmed" type="Integer" default="0"/>
+    <aura:attribute name="state_delta_recovered" type="Integer" default="0"/>
+    <aura:attribute name="state_delta_deceased" type="Integer" default="0"/>
+    <aura:attribute name="currentDateTime" type="DateTime"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <div>
+        <aura:if isTrue="{!v.showSpinner}">
+            <div>
+                <lightning:spinner alternativeText="Loading" size="large" variant="brand"/>
+            </div>
+            <aura:set attribute="else">
+                <div class="slds-text-heading_medium slds-text-align_center slds-m-around_large"><b>Covid-19 India Tracker</b></div>
+                <div class="slds-text-align_center">
+                    <p>
+                        <span class="slds-badge">Info:</span> 
+                        This application is designed to track real time information for all states and their respective districts. Expand states to view district data.
+                    </p>
+                    <p><span class="slds-badge">Last updated at:</span>{!v.currentDateTime}</p>
+                </div>
+                <br></br>
+                
+                <div class="slds-grid slds-gutters slds-p-around_small">
+                    <div class="slds-col slds-m-around_large">
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#ff073a;"><b>Confirmed</b></div>
+                        <div class="slds-text-heading_small slds-text-align_center" style="color:#ff073a;"><b>[+{!v.delta_confirmed}]</b></div>
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#ff073a;"><b>{!v.total_confirmed}</b></div>
+                    </div>
+                    <div class="slds-col slds-m-around_large">
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#007bff;"><b>Active</b></div>
+                        <br></br>
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#007bff;"><b>{!v.total_active}</b></div>
+                    </div>
+                    <div class="slds-col slds-m-around_large">
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#28a745;"><b>Recovered</b></div>
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#28a745;"><b>[+{!v.delta_recovered}]</b></div>
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#28a745;"><b>{!v.total_recovered}</b></div>
+                    </div>
+                    <div class="slds-col slds-m-around_large">
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#6c757d;"><b>Deceased</b></div>
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#6c757d;"><b>[+{!v.delta_deceased}]</b></div>
+                        <div class="slds-text-heading_medium slds-text-align_center" style="color:#6c757d;"><b>{!v.total_deceased}</b></div>
+                    </div>
+                </div>
+                <div class="slds-m-around_large slds-align_absolute-center" style="font-family: Georgia, serif;">        
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped" title="State and District Information" style="align-self: center;font-family: archia;">
+                        <thead>
+                            <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);"></th>
+                            <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);">State/UT</th>
+                            <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);">Confirmed</th>
+                            <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);">Active</th>
+                            <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);">Recovered</th>
+                            <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);">Deceased</th>
+                            <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);"></th>
+                        </thead>
+                        <tbody>
+                            <aura:iteration items="{!v.raw_data}" var="level0" indexVar="level0Index">
+                                <tr>
+                                    <td class="slds-truncate point-css font-tab"><lightning:buttonIcon value="{!level0Index}" onclick="{!c.toggle}" iconName="{!level0.expanded?'utility:chevronup':'utility:chevrondown'}"/></td>
+                                    <td class="slds-truncate point-css font-tab">{!level0.state}</td>
+                                    <td class="slds-truncate point-css font-tab">
+                                        <aura:if isTrue="{!level0.delta_confirmed > 0}">
+                                            <div style="font-size: .85rem; color: rgb(194, 57, 52); text-align: center;"> <lightning:icon iconName="utility:arrowup" alternativeText="Increased" size="xx-small" variant="error"/> {!level0.delta_confirmed}</div>
+                                        </aura:if>
+                                        <div style="font-size: .9rem; text-align: center;">{!level0.confirmed}</div>
+                                    </td>
+                                    <td class="slds-truncate point-css font-tab">                                 
+                                        <div style="font-size: .9rem; text-align: center;">{!level0.active}</div>
+                                    </td>
+                                    <td class="slds-truncate point-css font-tab">
+                                        <aura:if isTrue="{!level0.delta_recovered > 0}">
+                                            <div style="font-size: .85rem; color: rgb(2, 126, 70); text-align: center;"> <lightning:icon iconName="utility:arrowup" alternativeText="Increased" size="xx-small" variant="success"/> {!level0.delta_recovered}</div>
+                                        </aura:if>
+                                        <div style="font-size: .9rem; text-align: center;">{!level0.recovered}</div>
+                                    </td>
+                                    <td class="slds-truncate point-css font-tab">
+                                        <aura:if isTrue="{!level0.delta_deceased > 0}">
+                                            <div style="font-size: .85rem; color: rgb(107, 109, 112); text-align: center;"> <lightning:icon iconName="utility:arrowup" alternativeText="Increased" size="xx-small" variant="neutral"/> {!level0.delta_deceased}</div>
+                                        </aura:if>    
+                                        <div style="font-size: .9rem; text-align: center;">{!level0.deceased}</div>
+                                    </td>
+                                    <td>
+                                        <aura:if isTrue="{!level0.expanded}">
+                                            <div class="slds-m-around_small">
+                                                <table>
+                                                    <thead>
+                                                        <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);">Districts</th>
+                                                        <th class="slds-is-sortable state-head" scope="col" style="color:#6c757d;background-color:rgba(171, 173, 176, 0.4);">Confirmed</th>
+                                                    </thead>
+                                                    <tbody>
+                                                        <aura:iteration items="{!level0.districtData}" var="level1">
+                                                            <tr>
+                                                                <td>{!level1.district}</td>
+                                                                <td>
+                                                                    <aura:if isTrue="{!level1.delta.confirmed > 0}">
+                                                                        <div style="font-size: .85rem; color: rgb(194, 57, 52); text-align: center;"> <lightning:icon iconName="utility:arrowup" alternativeText="Increased" size="xx-small" variant="error"/> {!level1.delta.confirmed}</div>
+                                                                    </aura:if>
+                                                                    <div style="font-size: .9rem; text-align: center;">{!level1.confirmed}</div>
+                                                                </td>
+                                                            </tr>
+                                                        </aura:iteration>
+                                                    </tbody>
+                                                </table> 
+                                            </div>  
+                                        </aura:if>
+                                    </td>    
+                                </tr>
+                            </aura:iteration>
+                        </tbody>     
+                    </table>
+                </div>
+                <div class="slds-text-heading_small slds-text-align_center slds-m-around_medium">
+                    <p>We stand with everyone fighting on the frontlines</p>
+                </div>
+                <div class="slds-text-heading_small slds-text-align_center slds-m-around_medium">
+                    <p><span class="slds-badge">Resources:</span><a href="https://api.covid19india.org" target="_blank">https://api.covid19india.org</a></p>
+                </div>
+                <div class="slds-text-heading_small slds-text-align_center slds-m-around_medium">
+                    Made with <lightning:icon iconName="custom:custom1" alternativeText="Heart" title="Heart" /> by Priyankar Saha
+                </div>
+            </aura:set>      
+        </aura:if>
+    </div>
+</aura:component>
