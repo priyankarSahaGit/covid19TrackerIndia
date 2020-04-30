@@ -13,4 +13,16 @@ global class Covid19IndiaCtrl {
         String ret_jsonString = '[{'+'"info"'+':'+jsonString+'}]';
         return ret_jsonString;
     }
+    
+    @AuraEnabled
+    global static String getLatestUpdatesFromCovid19(){
+        Http httpProtocol = new Http();
+        HttpRequest request = new HttpRequest();
+        String endpoint = 'https://api.covid19india.org/updatelog/log.json';
+        request.setEndPoint(endpoint);
+        request.setMethod('GET');
+        HttpResponse response = httpProtocol.send(request);
+        String jsonString = response.getBody();
+        return jsonString;
+    }
 }
