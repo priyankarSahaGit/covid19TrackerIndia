@@ -1,0 +1,32 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global"
+                controller="Covid19IndiaCtrl">
+    
+    <aura:attribute name="currentDay" type="String"/>
+    <aura:attribute name="raw_data" type="Map[]"/> 
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:method name="loadLatestUpdates" action="{!c.fetchLatestUpdates}"/> 
+    
+    <lightning:layout multipleRows="true" class="slds-grid_horizontal max-1">
+        <aura:if isTrue="{!not(empty(v.raw_data))}">
+            <span class="slds-text-heading_medium slds-padding-around_small" style="color: rgb(7, 100, 239);"><b>{!v.currentDay}</b></span>
+            <aura:iteration items="{!v.raw_data}" var="up0">
+                <lightning:layoutItem size="12" padding="around-small">
+                    <div class="slds-box" style="padding:0.5rem;background:rgb(233, 234, 236);">
+                        <p class="slds-text-heading_small slds-text-align_left"> 
+                            <p><b>{!up0.timestamp}:</b></p> 
+                            <p>{!up0.update} </p>
+                        </p>                        
+                    </div>
+                </lightning:layoutItem>
+            </aura:iteration>
+            <aura:set attribute="else">
+            	<lightning:layoutItem size="12" padding="around-small">
+                    <div class="slds-box" style="padding:0.5rem;background:rgb(233, 234, 236);">
+                        <p class="slds-text-heading_small"> No updates yet! </p>
+                    </div>
+                </lightning:layoutItem>
+            </aura:set>
+        </aura:if>
+    </lightning:layout>
+</aura:component>
