@@ -6,7 +6,7 @@
         action.setCallback(this, function(a){
             var raw_response = a.getReturnValue();
             var response = JSON.parse(raw_response); 
-            console.log('---Print Response---',response);
+        
             //variables for total cases accross nation
             var total_confirmed = 0;
             var total_active = 0;
@@ -73,16 +73,39 @@
             info.sort(function(a, b){
                 return b.confirmed-a.confirmed
             })
+            for(var tx0 in info){
+                info[tx0].districtData.sort(function(a,b){
+                    if(a.district != 'Unknown' && b.district!= 'Unknown'){
+                     	return b.confirmed-a.confirmed   
+                    }
+                })
+            }
             component.set("v.raw_data", info);
             component.set("v.showSpinner",false);
         });
         $A.enqueueAction(action);        
     },
     
-    toggle : function(component,event,helper){
+    toggle : function(component, event, helper){
         var raw_data = component.get("v.raw_data"), index = event.getSource().get("v.value");
         raw_data[index].expanded = !raw_data[index].expanded;
         component.set("v.raw_data", raw_data);
     },
+    
+    openGithub : function(component, event, helper){
+		window.open("https://github.com/priyankarSahaGit/covid19TrackerIndia");        
+    },
+    
+    showUpdates : function(component, event, helper){
+        var showUpdates = component.get('v.showUpdates');
+        if(showUpdates){
+        	component.set("v.showUpdates",false);
+            return;
+        }else{
+            component.set("v.showUpdates",true);
+            var updatesComp = component.find('latestUpdatesId');
+            updatesComp.loadLatestUpdates();
+        }      
+    }
     
 })
